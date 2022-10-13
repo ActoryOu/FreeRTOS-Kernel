@@ -4177,11 +4177,7 @@ BaseType_t xTaskIncrementTick( void )
 #endif /* configUSE_APPLICATION_TASK_TAG */
 /*-----------------------------------------------------------*/
 
-#if ( configNUM_CORES == 1 )
-    void vTaskSwitchContext( void )
-#else
-    void vTaskSwitchContextForCore( BaseType_t xCoreID )
-#endif
+void vTaskSwitchContextForCore( BaseType_t xCoreID )
 {
     /* Acquire both locks:
      * - The ISR lock protects the ready list from simultaneous access by
@@ -4204,19 +4200,11 @@ BaseType_t xTaskIncrementTick( void )
         {
             /* The scheduler is currently suspended - do not allow a context
              * switch. */
-            #if ( configNUM_CORES == 1 )
-                xYieldPendings[ 0 ] = pdTRUE;
-            #else
-                xYieldPendings[ xCoreID ] = pdTRUE;
-            #endif
+            xYieldPendings[ xCoreID ] = pdTRUE;
         }
         else
         {
-            #if ( configNUM_CORES == 1 )
-                xYieldPendings[ 0 ] = pdFALSE;
-            #else
-                xYieldPendings[ xCoreID ] = pdFALSE;
-            #endif
+            xYieldPendings[ xCoreID ] = pdFALSE;
             traceTASK_SWITCHED_OUT();
 
             #if ( configGENERATE_RUN_TIME_STATS == 1 )
@@ -4287,16 +4275,15 @@ BaseType_t xTaskIncrementTick( void )
 }
 
 /*-----------------------------------------------------------*/
-#if ( configNUM_CORES > 1 )
-    void vTaskSwitchContext( void )
-    {
-        BaseType_t xCoreID;
 
-        xCoreID = portGET_CORE_ID();
+void vTaskSwitchContext( void )
+{
+    BaseType_t xCoreID;
 
-        vTaskSwitchContextForCore( xCoreID );
-    }
-#endif
+    xCoreID = portGET_CORE_ID();
+
+    vTaskSwitchContextForCore( xCoreID );
+}
 
 /*-----------------------------------------------------------*/
 
@@ -5718,17 +5705,7 @@ static void prvResetNextTaskUnblockTime( void )
 #endif /* configUSE_MUTEXES */
 /*-----------------------------------------------------------*/
 
-#if ( configNUM_CORES == 1 )
-    void vTaskYieldWithinAPI( void )
-    {
-        portYIELD_WITHIN_API();
-    }
-#else
-
-/*If not in a critical section then yield immediately.
- * Otherwise set xYieldPendings to true to wait to
- * yield until exiting the critical section.
- */
+#if ( configNUM_CORES > 1 )
     void vTaskYieldWithinAPI( void )
     {
         if( pxCurrentTCB->uxCriticalNesting == 0U )

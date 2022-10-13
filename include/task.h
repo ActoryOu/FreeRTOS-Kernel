@@ -3323,7 +3323,11 @@ void vTaskInternalSetTimeOutState( TimeOut_t * const pxTimeOut ) PRIVILEGED_FUNC
  * For internal use only. Same as portYIELD_WITHIN_API() in single core FreeRTOS.
  * For SMP this is not defined by the port.
  */
-void vTaskYieldWithinAPI( void );
+#if ( configNUM_CORES == 1 )
+    #define vTaskYieldWithinAPI    portYIELD_WITHIN_API
+#else
+    void vTaskYieldWithinAPI( void );
+#endif
 
 /* *INDENT-OFF* */
 #ifdef __cplusplus
