@@ -132,6 +132,13 @@ void vPortYieldOtherCore( int xOtherCoreID );
 #define portENABLE_INTERRUPTS() rtos_interrupt_unmask_all()
 
 /*
+ * Port set interrupt mask and clear interrupt mask.
+ */
+#define portSET_INTERRUPT_MASK()            rtos_interrupt_mask_all()
+
+#define portCLEAR_INTERRUPT_MASK(ulState)   rtos_interrupt_mask_set(ulState)
+
+/*
  * Will enable interrupts if ulState is non-zero.
  */
 #define portRESTORE_INTERRUPTS(ulState) rtos_interrupt_mask_set(ulState)

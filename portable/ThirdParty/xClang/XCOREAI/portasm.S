@@ -2,11 +2,11 @@
 
 #include "rtos_support_rtos_config.h"
 
-/* The FreeRTOS interrupt code calls vTaskSwitchContext.
+/* The FreeRTOS interrupt code calls vTaskSwitchContextForCore.
 Therfore it must be added to the rtos_isr group with the
 rest of the ISR callback functions. */
 .weak _fptrgroup.rtos_isr.nstackwords.group
-.add_to_set _fptrgroup.rtos_isr.nstackwords.group, vTaskSwitchContext.nstackwords, vTaskSwitchContext
+.add_to_set _fptrgroup.rtos_isr.nstackwords.group, vTaskSwitchContextForCore.nstackwords, vTaskSwitchContextForCore
 
 .globl kexcept
 .align 128              /* align the kernel section to 128 bytes */
@@ -58,7 +58,7 @@ rtos_interrupt_callback_common:
   /* Save the thread's context onto the thread's stack. */
   /* The stack was extended for this by the wrapper function. */
   /* Begin only by saving some registers. The rest will be saved */
-  /* later if vTaskSwitchContext() needs to be called. */
+  /* later if vTaskSwitchContextForCore() needs to be called. */
   /* DP and CP need to be saved because these are restored for the kernel ISR. */
   /* LR needs to be saved because it is clobbered when calling the callback. */
   /* r0-r3, and r11 need to be saved because the callback may clobber them. */
@@ -131,8 +131,8 @@ _yield_continue:
  {kentsp 0                         /* switch back to the kernel stack. */
 
   mov    r6,     r0}               /* copy the RTOS core ID into r6 so we don't lose it. */
-  ldap   r11,    vTaskSwitchContext
-  bla    r11             /* Finally call vTaskSwitchContext(core_id) now that the task's */
+  ldap   r11,    vTaskSwitchContextForCore
+  bla    r11             /* Finally call vTaskSwitchContextForCore(core_id) now that the task's */
                          /* entire context is saved. Note the core id in r0 is the argument. */
 
 //krestsp 0              /* unnecessary since KSP is already set and the SP */
