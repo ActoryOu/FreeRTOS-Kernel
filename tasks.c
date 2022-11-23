@@ -1011,7 +1011,7 @@ static void prvAddNewTaskToReadyList( TCB_t * pxNewTCB ) PRIVILEGED_FUNCTION;
                     {
                         /* Once a task has been selected to run on this core,
                          * move it to the end of the ready task list. */
-                        uxListRemove( pxIterator );
+                        ( void ) uxListRemove( pxIterator );
                         vListInsertEnd( pxReadyList, pxIterator );
                         break;
                     }
