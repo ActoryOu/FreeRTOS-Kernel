@@ -277,7 +277,7 @@ typedef enum
 #define taskSCHEDULER_RUNNING        ( ( BaseType_t ) 2 )
 
 /* Checks if core ID is valid. */
-#define taskVALID_CORE_ID( xCoreID )    ( ( 0 <= xCoreID ) && ( xCoreID < configNUM_CORES ) )
+#define taskVALID_CORE_ID( xCoreID )    ( ( 0U <= xCoreID ) && ( xCoreID < configNUM_CORES ) )
 
 /*-----------------------------------------------------------
 * TASK CREATION API

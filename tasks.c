@@ -277,7 +277,7 @@ typedef BaseType_t TaskRunning_t;
     #define taskTASK_IS_RUNNING( pxTCB )     ( ( pxTCB ) == pxCurrentTCB )
     #define taskTASK_IS_YIELDING( pxTCB )    ( pdFALSE )
 #else
-    #define taskTASK_IS_RUNNING( pxTCB )     ( ( ( pxTCB )->xTaskRunState >= 0 ) && ( ( pxTCB )->xTaskRunState < configNUM_CORES ) )
+    #define taskTASK_IS_RUNNING( pxTCB )     ( ( ( pxTCB )->xTaskRunState >= ( BaseType_t ) 0 ) && ( ( pxTCB )->xTaskRunState < ( BaseType_t ) configNUM_CORES ) )
     #define taskTASK_IS_YIELDING( pxTCB )    ( ( pxTCB )->xTaskRunState == taskTASK_YIELDING )
 #endif
 
@@ -834,7 +834,7 @@ static void prvAddNewTaskToReadyList( TCB_t * pxNewTCB ) PRIVILEGED_FUNCTION;
         {
             xLowestPriorityToPreempt = ( BaseType_t ) pxTCB->uxPriority;
 
-            if( xPreemptEqualPriority == pdFALSE )
+            if( xPreemptEqualPriority == ( BaseType_t ) pdFALSE )
             {
                 /* xLowestPriorityToPreempt will be decremented to -1 if the priority of pxTCB
                  * is 0. This is ok as we will give system idle tasks a priority of -1 below. */
@@ -846,21 +846,21 @@ static void prvAddNewTaskToReadyList( TCB_t * pxNewTCB ) PRIVILEGED_FUNCTION;
                 xCurrentCoreTaskPriority = ( BaseType_t ) pxCurrentTCBs[ xCoreID ]->uxPriority;
 
                 /* System idle tasks are being assigned a priority of tskIDLE_PRIORITY - 1 here. */
-                if( ( pxCurrentTCBs[ xCoreID ]->uxTaskAttributes & taskATTRIBUTE_IS_IDLE ) != 0 )
+                if( ( pxCurrentTCBs[ xCoreID ]->uxTaskAttributes & taskATTRIBUTE_IS_IDLE ) != 0U )
                 {
                     xCurrentCoreTaskPriority = xCurrentCoreTaskPriority - 1;
                 }
 
-                if( ( taskTASK_IS_RUNNING( pxCurrentTCBs[ xCoreID ] ) != pdFALSE ) && ( xYieldPendings[ xCoreID ] == pdFALSE ) )
+                if( taskTASK_IS_RUNNING( pxCurrentTCBs[ xCoreID ] ) && ( xYieldPendings[ xCoreID ] == ( BaseType_t ) pdFALSE ) )
                 {
                     if( xCurrentCoreTaskPriority <= xLowestPriorityToPreempt )
                     {
                         #if ( configUSE_CORE_AFFINITY == 1 )
-                            if( ( pxTCB->uxCoreAffinityMask & ( 1U << ( UBaseType_t ) xCoreID ) ) != 0 )
+                            if( ( pxTCB->uxCoreAffinityMask & ( 1U << ( UBaseType_t ) xCoreID ) ) != 0U )
                         #endif
                         {
                             #if ( configUSE_TASK_PREEMPTION_DISABLE == 1 )
-                                if( pxCurrentTCBs[ xCoreID ]->xPreemptionDisable == pdFALSE )
+                                if( pxCurrentTCBs[ xCoreID ]->xPreemptionDisable == ( BaseType_t ) pdFALSE )
                             #endif
                             {
                                 xLowestPriorityToPreempt = xCurrentCoreTaskPriority;
@@ -896,7 +896,7 @@ static void prvAddNewTaskToReadyList( TCB_t * pxNewTCB ) PRIVILEGED_FUNCTION;
                 }
             }
 
-            if( ( xYieldCount == 0 ) && taskVALID_CORE_ID( xLowestPriorityCore ) )
+            if( ( xYieldCount == ( BaseType_t ) 0 ) && taskVALID_CORE_ID( ( UBaseType_t ) xLowestPriorityCore ) )
             {
                 prvYieldCore( xLowestPriorityCore );
             }
@@ -929,7 +929,7 @@ static void prvAddNewTaskToReadyList( TCB_t * pxNewTCB ) PRIVILEGED_FUNCTION;
             BaseType_t xPriorityDropped = ( BaseType_t ) pdFALSE;
         #endif
 
-        while( xTaskScheduled == pdFALSE )
+        while( xTaskScheduled == ( BaseType_t ) pdFALSE )
         {
             #if ( configRUN_MULTIPLE_PRIORITIES == 0 )
             {
@@ -975,7 +975,7 @@ static void prvAddNewTaskToReadyList( TCB_t * pxNewTCB ) PRIVILEGED_FUNCTION;
                     if( pxTCB->xTaskRunState == taskTASK_NOT_RUNNING )
                     {
                         #if ( configUSE_CORE_AFFINITY == 1 )
-                            if( ( pxTCB->uxCoreAffinityMask & ( 1U << ( UBaseType_t ) xCoreID ) ) != 0 )
+                            if( ( pxTCB->uxCoreAffinityMask & ( 1U << ( UBaseType_t ) xCoreID ) ) != 0U )
                         #endif
                         {
                             /* If the task is not being executed by any core swap it in. */
@@ -993,7 +993,7 @@ static void prvAddNewTaskToReadyList( TCB_t * pxNewTCB ) PRIVILEGED_FUNCTION;
                         configASSERT( ( pxTCB->xTaskRunState == xCoreID ) || ( pxTCB->xTaskRunState == taskTASK_YIELDING ) );
 
                         #if ( configUSE_CORE_AFFINITY == 1 )
-                            if( ( pxTCB->uxCoreAffinityMask & ( 1U << ( UBaseType_t ) xCoreID ) ) != 0 )
+                            if( ( pxTCB->uxCoreAffinityMask & ( 1U << ( UBaseType_t ) xCoreID ) ) != 0U )
                         #endif
                         {
                             /* The task is already running on this core, mark it as scheduled. */
@@ -1007,7 +1007,7 @@ static void prvAddNewTaskToReadyList( TCB_t * pxNewTCB ) PRIVILEGED_FUNCTION;
                         mtCOVERAGE_TEST_MARKER();
                     }
 
-                    if( xTaskScheduled != pdFALSE )
+                    if( xTaskScheduled != ( BaseType_t ) pdFALSE )
                     {
                         /* Once a task has been selected to run on this core,
                          * move it to the end of the ready task list. */
@@ -1019,12 +1019,12 @@ static void prvAddNewTaskToReadyList( TCB_t * pxNewTCB ) PRIVILEGED_FUNCTION;
             }
             else
             {
-                if( xDecrementTopPriority != pdFALSE )
+                if( xDecrementTopPriority != ( BaseType_t ) pdFALSE )
                 {
                     uxTopReadyPriority--;
                     #if ( configRUN_MULTIPLE_PRIORITIES == 0 )
                     {
-                        xPriorityDropped = pdTRUE;
+                        xPriorityDropped = ( BaseType_t ) pdTRUE;
                     }
                     #endif
                 }
@@ -1033,7 +1033,7 @@ static void prvAddNewTaskToReadyList( TCB_t * pxNewTCB ) PRIVILEGED_FUNCTION;
             /* This function can get called by vTaskSuspend() before the scheduler is started.
              * In that case, since the idle tasks have not yet been created it is possible that we
              * won't find a new task to schedule. Return pdFALSE in this case. */
-            if( ( xSchedulerRunning == pdFALSE ) && ( uxCurrentPriority == tskIDLE_PRIORITY ) && ( xTaskScheduled == pdFALSE ) )
+            if( ( xSchedulerRunning == ( BaseType_t ) pdFALSE ) && ( uxCurrentPriority == tskIDLE_PRIORITY ) && ( xTaskScheduled == ( BaseType_t ) pdFALSE ) )
             {
                 break;
             }
@@ -1042,7 +1042,7 @@ static void prvAddNewTaskToReadyList( TCB_t * pxNewTCB ) PRIVILEGED_FUNCTION;
             uxCurrentPriority--;
         }
 
-        if( xTaskScheduled == pdTRUE )
+        if( xTaskScheduled == ( BaseType_t ) pdTRUE )
         {
             configASSERT( taskTASK_IS_RUNNING( pxCurrentTCBs[ xCoreID ] ) );
 
@@ -1076,12 +1076,12 @@ static void prvAddNewTaskToReadyList( TCB_t * pxNewTCB ) PRIVILEGED_FUNCTION;
                     BaseType_t xLowestPriority = ( BaseType_t ) pxPreviousTCB->uxPriority;
                     BaseType_t xLowestPriorityCore = -1;
 
-                    if( ( pxPreviousTCB->uxTaskAttributes & taskATTRIBUTE_IS_IDLE ) != 0 )
+                    if( ( pxPreviousTCB->uxTaskAttributes & taskATTRIBUTE_IS_IDLE ) != 0U )
                     {
                         xLowestPriority = xLowestPriority - 1;
                     }
 
-                    if( ( uxCoreMap & ( 1U << ( UBaseType_t ) xCoreID ) ) != 0 )
+                    if( ( uxCoreMap & ( 1U << ( UBaseType_t ) xCoreID ) ) != 0U )
                     {
                         /* The ready task that was removed from this core is not excluded from it.
                          * Only look at the intersection of the cores the removed task is allowed to run
@@ -1097,7 +1097,7 @@ static void prvAddNewTaskToReadyList( TCB_t * pxNewTCB ) PRIVILEGED_FUNCTION;
 
                     uxCoreMap &= ( ( 1U << configNUM_CORES ) - 1U );
 
-                    while( uxCoreMap != 0 )
+                    while( uxCoreMap != 0U )
                     {
                         uint32_t uxCore;
                         BaseType_t xTaskPriority;
@@ -1107,7 +1107,7 @@ static void prvAddNewTaskToReadyList( TCB_t * pxNewTCB ) PRIVILEGED_FUNCTION;
 
                         xTaskPriority = ( BaseType_t ) pxCurrentTCBs[ uxCore ]->uxPriority;
 
-                        if( ( pxCurrentTCBs[ uxCore ]->uxTaskAttributes & taskATTRIBUTE_IS_IDLE ) != 0 )
+                        if( ( pxCurrentTCBs[ uxCore ]->uxTaskAttributes & taskATTRIBUTE_IS_IDLE ) != 0U )
                         {
                             xTaskPriority = xTaskPriority - ( BaseType_t ) 1;
                         }
@@ -1115,11 +1115,11 @@ static void prvAddNewTaskToReadyList( TCB_t * pxNewTCB ) PRIVILEGED_FUNCTION;
                         uxCoreMap &= ~( 1U << uxCore );
 
                         if( ( xTaskPriority < xLowestPriority ) &&
-                            ( taskTASK_IS_RUNNING( pxCurrentTCBs[ uxCore ] ) != pdFALSE ) &&
-                            ( xYieldPendings[ uxCore ] == pdFALSE ) )
+                            taskTASK_IS_RUNNING( pxCurrentTCBs[ uxCore ] ) &&
+                            ( xYieldPendings[ uxCore ] == ( BaseType_t ) pdFALSE ) )
                         {
                             #if ( configUSE_TASK_PREEMPTION_DISABLE == 1 )
-                                if( pxCurrentTCBs[ uxCore ]->xPreemptionDisable == pdFALSE )
+                                if( pxCurrentTCBs[ uxCore ]->xPreemptionDisable == ( BaseType_t ) pdFALSE )
                             #endif
                             {
                                 xLowestPriority = xTaskPriority;
@@ -1128,7 +1128,7 @@ static void prvAddNewTaskToReadyList( TCB_t * pxNewTCB ) PRIVILEGED_FUNCTION;
                         }
                     }
 
-                    if( taskVALID_CORE_ID( xLowestPriorityCore ) )
+                    if( taskVALID_CORE_ID( ( UBaseType_t ) xLowestPriorityCore ) )
                     {
                         prvYieldCore( xLowestPriorityCore );
                     }
@@ -1816,7 +1816,7 @@ static void prvInitialiseNewTask( TaskFunction_t pxTaskCode,
         {
             uxCurrentNumberOfTasks++;
 
-            if( xSchedulerRunning == pdFALSE )
+            if( xSchedulerRunning == ( BaseType_t ) pdFALSE )
             {
                 if( uxCurrentNumberOfTasks == ( UBaseType_t ) 1 )
                 {
@@ -1830,12 +1830,12 @@ static void prvInitialiseNewTask( TaskFunction_t pxTaskCode,
                     mtCOVERAGE_TEST_MARKER();
                 }
 
-                if( ( pxNewTCB->uxTaskAttributes & taskATTRIBUTE_IS_IDLE ) != 0 )
+                if( ( pxNewTCB->uxTaskAttributes & taskATTRIBUTE_IS_IDLE ) != 0U )
                 {
                     BaseType_t xCoreID;
 
                     /* Check if a core is free. */
-                    for( xCoreID = 0; xCoreID < configNUM_CORES; xCoreID++ )
+                    for( xCoreID = 0; xCoreID < ( BaseType_t ) configNUM_CORES; xCoreID++ )
                     {
                         if( pxCurrentTCBs[ xCoreID ] == NULL )
                         {
@@ -1869,7 +1869,7 @@ static void prvInitialiseNewTask( TaskFunction_t pxTaskCode,
 
             portSETUP_TCB( pxNewTCB );
 
-            if( xSchedulerRunning != pdFALSE )
+            if( xSchedulerRunning != ( BaseType_t ) pdFALSE )
             {
                 /* If the created task is of a higher priority than another
                  * currently running task and preemption is on then it should
@@ -2012,7 +2012,7 @@ static void prvInitialiseNewTask( TaskFunction_t pxTaskCode,
             }
 
             /* Force a reschedule if the task that has just been deleted was running. */
-            if( ( xSchedulerRunning != pdFALSE ) && ( taskTASK_IS_RUNNING( pxTCB ) ) )
+            if( ( xSchedulerRunning != ( BaseType_t ) pdFALSE ) && ( taskTASK_IS_RUNNING( pxTCB ) ) )
             {
                 if( pxTCB->xTaskRunState == portGET_CORE_ID() )
                 {
@@ -2444,7 +2444,7 @@ static void prvInitialiseNewTask( TaskFunction_t pxTaskCode,
                      * there may now be another task of higher priority that
                      * is ready to execute. */
                     #if ( configUSE_TASK_PREEMPTION_DISABLE == 1 )
-                        if( pxTCB->xPreemptionDisable == pdFALSE )
+                        if( pxTCB->xPreemptionDisable == ( BaseType_t ) pdFALSE )
                     #endif
                     {
                         xYieldRequired = ( BaseType_t ) pdTRUE;
@@ -2590,13 +2590,13 @@ static void prvInitialiseNewTask( TaskFunction_t pxTaskCode,
 
             pxTCB->uxCoreAffinityMask = uxCoreAffinityMask;
 
-            if( xSchedulerRunning != pdFALSE )
+            if( xSchedulerRunning != ( BaseType_t ) pdFALSE )
             {
                 if( taskTASK_IS_RUNNING( pxTCB ) )
                 {
                     xCoreID = ( BaseType_t ) pxTCB->xTaskRunState;
 
-                    if( ( uxCoreAffinityMask & ( 1U << ( UBaseType_t ) xCoreID ) ) == 0 )
+                    if( ( uxCoreAffinityMask & ( 1U << ( UBaseType_t ) xCoreID ) ) == 0U )
                     {
                         prvYieldCore( xCoreID );
                     }
@@ -2658,7 +2658,7 @@ static void prvInitialiseNewTask( TaskFunction_t pxTaskCode,
 
             pxTCB->xPreemptionDisable = ( BaseType_t ) pdFALSE;
 
-            if( xSchedulerRunning != pdFALSE )
+            if( xSchedulerRunning != ( BaseType_t ) pdFALSE )
             {
                 if( taskTASK_IS_RUNNING( pxTCB ) )
                 {
@@ -2788,7 +2788,7 @@ static void prvInitialiseNewTask( TaskFunction_t pxTaskCode,
         }
         #else /* #if ( configNUM_CORES == 1 ) */
         {
-            if( xSchedulerRunning != pdFALSE )
+            if( xSchedulerRunning != ( BaseType_t ) pdFALSE )
             {
                 /* Reset the next expected unblock time in case it referred to the
                  * task that is now in the Suspended state. */
@@ -2801,7 +2801,7 @@ static void prvInitialiseNewTask( TaskFunction_t pxTaskCode,
 
             if( taskTASK_IS_RUNNING( pxTCB ) )
             {
-                if( xSchedulerRunning != pdFALSE )
+                if( xSchedulerRunning != ( BaseType_t ) pdFALSE )
                 {
                     if( xTaskRunningOnCore == portGET_CORE_ID() )
                     {
@@ -2839,7 +2839,7 @@ static void prvInitialiseNewTask( TaskFunction_t pxTaskCode,
                         /* Attempt to switch in a new task. This could fail since the idle tasks
                          * haven't been created yet. If it does then set the core's TCB back to
                          * NULL. */
-                        if( prvSelectHighestPriorityTask( xTaskRunningOnCore ) == pdFALSE )
+                        if( prvSelectHighestPriorityTask( xTaskRunningOnCore ) == ( BaseType_t ) pdFALSE )
                         {
                             pxTCB->xTaskRunState = taskTASK_NOT_RUNNING;
                             pxCurrentTCBs[ xTaskRunningOnCore ] = NULL;
@@ -3053,7 +3053,7 @@ static void prvInitialiseNewTask( TaskFunction_t pxTaskCode,
                 {
                     prvYieldForTask( pxTCB, ( BaseType_t ) pdTRUE );
 
-                    if( xYieldPendings[ portGET_CORE_ID() ] != pdFALSE )
+                    if( xYieldPendings[ portGET_CORE_ID() ] != ( BaseType_t ) pdFALSE )
                     {
                         xYieldRequired = ( BaseType_t ) pdTRUE;
                     }
@@ -3351,7 +3351,7 @@ void vTaskSuspendAll( void )
         /* This must only be called from within a task. */
         portASSERT_IF_IN_ISR();
 
-        if( xSchedulerRunning != pdFALSE )
+        if( xSchedulerRunning != ( BaseType_t ) pdFALSE )
         {
             /* Writes to uxSchedulerSuspended must be protected by both the task AND ISR locks.
              * We must disable interrupts before we grab the locks in the event that this task is
@@ -4287,10 +4287,10 @@ BaseType_t xTaskIncrementTick( void )
                     for( x = ( UBaseType_t ) 0; x < ( UBaseType_t ) configNUM_CORES; x++ )
                     {
                         #if ( configUSE_TASK_PREEMPTION_DISABLE == 1 )
-                            if( pxCurrentTCBs[ x ]->xPreemptionDisable == pdFALSE )
+                            if( pxCurrentTCBs[ x ]->xPreemptionDisable == ( BaseType_t ) pdFALSE )
                         #endif
                         {
-                            if( ( xYieldRequiredForCore[ x ] != pdFALSE ) || ( xYieldPendings[ x ] != pdFALSE ) )
+                            if( ( xYieldRequiredForCore[ x ] != ( BaseType_t ) pdFALSE ) || ( xYieldPendings[ x ] != ( BaseType_t ) pdFALSE ) )
                             {
                                 if( x == ( UBaseType_t ) xCoreID )
                                 {
@@ -4776,7 +4776,7 @@ BaseType_t xTaskRemoveFromEventList( const List_t * const pxEventList )
         {
             prvYieldForTask( pxUnblockedTCB, ( BaseType_t ) pdFALSE );
 
-            if( xYieldPendings[ portGET_CORE_ID() ] != pdFALSE )
+            if( xYieldPendings[ portGET_CORE_ID() ] != ( BaseType_t ) pdFALSE )
             {
                 xReturn = ( BaseType_t ) pdTRUE;
             }
@@ -5773,7 +5773,7 @@ static void prvResetNextTaskUnblockTime( void )
         {
             TaskHandle_t xReturn = NULL;
 
-            if( taskVALID_CORE_ID( xCoreID ) != pdFALSE )
+            if( taskVALID_CORE_ID( ( UBaseType_t ) xCoreID ) )
             {
                 xReturn = pxCurrentTCBs[ xCoreID ];
             }
@@ -6163,7 +6163,7 @@ static void prvResetNextTaskUnblockTime( void )
                  * interrupt.  Only assert if the critical nesting count is 1 to
                  * protect against recursive calls if the assert function also uses a
                  * critical section. */
-                if( pxCurrentTCB->uxCriticalNesting == 1 )
+                if( pxCurrentTCB->uxCriticalNesting == 1U )
                 {
                     portASSERT_IF_IN_ISR();
 
@@ -6195,7 +6195,7 @@ static void prvResetNextTaskUnblockTime( void )
     {
         UBaseType_t uxSavedInterruptStatus = 0;
 
-        if( xSchedulerRunning != pdFALSE )
+        if( xSchedulerRunning != ( BaseType_t ) pdFALSE )
         {
             uxSavedInterruptStatus = portSET_INTERRUPT_MASK_FROM_ISR();
 
@@ -6261,7 +6261,7 @@ static void prvResetNextTaskUnblockTime( void )
                          * xYieldPending to true. So now that we have exited the
                          * critical section check if xYieldPending is true, and
                          * if so yield. */
-                        if( xYieldCurrentTask != pdFALSE )
+                        if( xYieldCurrentTask != ( BaseType_t ) pdFALSE )
                         {
                             portYIELD();
                         }
@@ -6293,7 +6293,7 @@ static void prvResetNextTaskUnblockTime( void )
     {
         BaseType_t xYieldCurrentTask;
 
-        if( xSchedulerRunning != pdFALSE )
+        if( xSchedulerRunning != ( BaseType_t ) pdFALSE )
         {
             /* If pxCurrentTCB->uxCriticalNesting is zero then this function
              * does not match a previous call to vTaskEnterCritical(). */
@@ -6315,7 +6315,7 @@ static void prvResetNextTaskUnblockTime( void )
                      * xYieldPending to true. So now that we have exited the
                      * critical section check if xYieldPending is true, and
                      * if so yield. */
-                    if( xYieldCurrentTask != pdFALSE )
+                    if( xYieldCurrentTask != ( BaseType_t ) pdFALSE )
                     {
                         portYIELD();
                     }
@@ -7118,7 +7118,7 @@ TickType_t uxTaskResetEventItemValue( void )
                     {
                         prvYieldForTask( pxTCB, ( BaseType_t ) pdFALSE );
 
-                        if( xYieldPendings[ portGET_CORE_ID() ] == pdTRUE )
+                        if( xYieldPendings[ portGET_CORE_ID() ] == ( BaseType_t ) pdTRUE )
                         {
                             if( pxHigherPriorityTaskWoken != NULL )
                             {
@@ -7229,7 +7229,7 @@ TickType_t uxTaskResetEventItemValue( void )
                     {
                         prvYieldForTask( pxTCB, ( BaseType_t ) pdFALSE );
 
-                        if( xYieldPendings[ portGET_CORE_ID() ] == pdTRUE )
+                        if( xYieldPendings[ portGET_CORE_ID() ] == ( BaseType_t ) pdTRUE )
                         {
                             if( pxHigherPriorityTaskWoken != NULL )
                             {
