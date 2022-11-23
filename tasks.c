@@ -856,7 +856,7 @@ static void prvAddNewTaskToReadyList( TCB_t * pxNewTCB ) PRIVILEGED_FUNCTION;
                     if( xCurrentCoreTaskPriority <= xLowestPriorityToPreempt )
                     {
                         #if ( configUSE_CORE_AFFINITY == 1 )
-                            if( ( pxTCB->uxCoreAffinityMask & ( 1U << ( UBaseType_t ) xCoreID ) ) != 0U )
+                            if( ( pxTCB->uxCoreAffinityMask & ( ( UBaseType_t ) 1 << ( UBaseType_t ) xCoreID ) ) != 0U )
                         #endif
                         {
                             #if ( configUSE_TASK_PREEMPTION_DISABLE == 1 )
@@ -975,7 +975,7 @@ static void prvAddNewTaskToReadyList( TCB_t * pxNewTCB ) PRIVILEGED_FUNCTION;
                     if( pxTCB->xTaskRunState == taskTASK_NOT_RUNNING )
                     {
                         #if ( configUSE_CORE_AFFINITY == 1 )
-                            if( ( pxTCB->uxCoreAffinityMask & ( 1U << ( UBaseType_t ) xCoreID ) ) != 0U )
+                            if( ( pxTCB->uxCoreAffinityMask & ( ( UBaseType_t ) 1 << ( UBaseType_t ) xCoreID ) ) != 0U )
                         #endif
                         {
                             /* If the task is not being executed by any core swap it in. */
@@ -993,7 +993,7 @@ static void prvAddNewTaskToReadyList( TCB_t * pxNewTCB ) PRIVILEGED_FUNCTION;
                         configASSERT( ( pxTCB->xTaskRunState == xCoreID ) || ( pxTCB->xTaskRunState == taskTASK_YIELDING ) );
 
                         #if ( configUSE_CORE_AFFINITY == 1 )
-                            if( ( pxTCB->uxCoreAffinityMask & ( 1U << ( UBaseType_t ) xCoreID ) ) != 0U )
+                            if( ( pxTCB->uxCoreAffinityMask & ( ( UBaseType_t ) 1 << ( UBaseType_t ) xCoreID ) ) != 0U )
                         #endif
                         {
                             /* The task is already running on this core, mark it as scheduled. */
@@ -1081,7 +1081,7 @@ static void prvAddNewTaskToReadyList( TCB_t * pxNewTCB ) PRIVILEGED_FUNCTION;
                         xLowestPriority = xLowestPriority - 1;
                     }
 
-                    if( ( uxCoreMap & ( 1U << ( UBaseType_t ) xCoreID ) ) != 0U )
+                    if( ( uxCoreMap & ( ( UBaseType_t ) 1 << ( UBaseType_t ) xCoreID ) ) != 0U )
                     {
                         /* The ready task that was removed from this core is not excluded from it.
                          * Only look at the intersection of the cores the removed task is allowed to run
@@ -1112,7 +1112,7 @@ static void prvAddNewTaskToReadyList( TCB_t * pxNewTCB ) PRIVILEGED_FUNCTION;
                             xTaskPriority = xTaskPriority - ( BaseType_t ) 1;
                         }
 
-                        uxCoreMap &= ~( 1U << uxCore );
+                        uxCoreMap &= ~( ( UBaseType_t ) 1 << uxCore );
 
                         if( ( xTaskPriority < xLowestPriority ) &&
                             taskTASK_IS_RUNNING( pxCurrentTCBs[ uxCore ] ) &&
@@ -2596,7 +2596,7 @@ static void prvInitialiseNewTask( TaskFunction_t pxTaskCode,
                 {
                     xCoreID = ( BaseType_t ) pxTCB->xTaskRunState;
 
-                    if( ( uxCoreAffinityMask & ( 1U << ( UBaseType_t ) xCoreID ) ) == 0U )
+                    if( ( uxCoreAffinityMask & ( ( UBaseType_t ) 1 << ( UBaseType_t ) xCoreID ) ) == 0U )
                     {
                         prvYieldCore( xCoreID );
                     }
@@ -3113,7 +3113,15 @@ static BaseType_t prvCreateIdleTasks( void )
         {
             if( x < configMAX_TASK_NAME_LEN )
             {
-                cIdleName[ x++ ] = ( char ) ( xCoreID + ( BaseType_t ) '0' );
+                BaseType_t xBytePrint = 0;
+                UBaseType_t uxRemainBytes = ( UBaseType_t ) ( ( UBaseType_t ) configMAX_TASK_NAME_LEN - ( UBaseType_t ) x );
+                
+                xBytePrint = snprintf( cIdleName + x, uxRemainBytes, "%d", xCoreID );
+
+                if( xBytePrint > ( BaseType_t ) 0 )
+                {
+                    x = ( BaseType_t ) strlen( cIdleName );
+                }
 
                 /* And append a null character if there is space. */
                 if( x < configMAX_TASK_NAME_LEN )
