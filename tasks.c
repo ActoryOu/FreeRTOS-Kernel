@@ -3113,7 +3113,7 @@ static BaseType_t prvCreateIdleTasks( void )
         {
             if( x < configMAX_TASK_NAME_LEN )
             {
-                cIdleName[ x++ ] = ( char ) xCoreID + '0';
+                cIdleName[ x++ ] = ( char ) ( xCoreID + ( BaseType_t ) '0' );
 
                 /* And append a null character if there is space. */
                 if( x < configMAX_TASK_NAME_LEN )
