@@ -791,7 +791,7 @@ static void prvAddNewTaskToReadyList( TCB_t * pxNewTCB ) PRIVILEGED_FUNCTION;
         /* This must be called from a critical section and xCoreID must be valid. */
         if( portCHECK_IF_IN_ISR() && ( xCoreID == portGET_CORE_ID() ) )
         {
-            xYieldPendings[ xCoreID ] = pdTRUE;
+            xYieldPendings[ xCoreID ] = ( BaseType_t ) pdTRUE;
         }
         else
         {
@@ -799,7 +799,7 @@ static void prvAddNewTaskToReadyList( TCB_t * pxNewTCB ) PRIVILEGED_FUNCTION;
             {
                 if( xCoreID == portGET_CORE_ID() )
                 {
-                    xYieldPendings[ xCoreID ] = pdTRUE;
+                    xYieldPendings[ xCoreID ] = ( BaseType_t ) pdTRUE;
                 }
                 else
                 {
@@ -919,14 +919,14 @@ static void prvAddNewTaskToReadyList( TCB_t * pxNewTCB ) PRIVILEGED_FUNCTION;
     static BaseType_t prvSelectHighestPriorityTask( BaseType_t xCoreID )
     {
         UBaseType_t uxCurrentPriority = uxTopReadyPriority;
-        BaseType_t xTaskScheduled = pdFALSE;
-        BaseType_t xDecrementTopPriority = pdTRUE;
+        BaseType_t xTaskScheduled = ( BaseType_t ) pdFALSE;
+        BaseType_t xDecrementTopPriority = ( BaseType_t ) pdTRUE;
 
         #if ( configUSE_CORE_AFFINITY == 1 )
             TCB_t * pxPreviousTCB = NULL;
         #endif
         #if ( configRUN_MULTIPLE_PRIORITIES == 0 )
-            BaseType_t xPriorityDropped = pdFALSE;
+            BaseType_t xPriorityDropped = ( BaseType_t ) pdFALSE;
         #endif
 
         while( xTaskScheduled == pdFALSE )
@@ -951,7 +951,7 @@ static void prvAddNewTaskToReadyList( TCB_t * pxNewTCB ) PRIVILEGED_FUNCTION;
 
                 /* The ready task list for uxCurrentPriority is not empty, so uxTopReadyPriority
                  * must not be decremented any further. */
-                xDecrementTopPriority = pdFALSE;
+                xDecrementTopPriority = ( BaseType_t ) pdFALSE;
 
                 for( pxIterator = listGET_HEAD_ENTRY( pxReadyList ); pxIterator != pxEndMarker; pxIterator = listGET_NEXT( pxIterator ) )
                 {
@@ -985,7 +985,7 @@ static void prvAddNewTaskToReadyList( TCB_t * pxNewTCB ) PRIVILEGED_FUNCTION;
                             #endif
                             pxTCB->xTaskRunState = ( TaskRunning_t ) xCoreID;
                             pxCurrentTCBs[ xCoreID ] = pxTCB;
-                            xTaskScheduled = pdTRUE;
+                            xTaskScheduled = ( BaseType_t ) pdTRUE;
                         }
                     }
                     else if( pxTCB == pxCurrentTCBs[ xCoreID ] )
@@ -998,7 +998,7 @@ static void prvAddNewTaskToReadyList( TCB_t * pxNewTCB ) PRIVILEGED_FUNCTION;
                         {
                             /* The task is already running on this core, mark it as scheduled. */
                             pxTCB->xTaskRunState = ( TaskRunning_t ) xCoreID;
-                            xTaskScheduled = pdTRUE;
+                            xTaskScheduled = ( BaseType_t ) pdTRUE;
                         }
                     }
                     else
@@ -1073,7 +1073,7 @@ static void prvAddNewTaskToReadyList( TCB_t * pxNewTCB ) PRIVILEGED_FUNCTION;
                     /* A ready task was just evicted from this core. See if it can be
                      * scheduled on any other core. */
                     UBaseType_t uxCoreMap = pxPreviousTCB->uxCoreAffinityMask;
-                    BaseType_t xLowestPriority = pxPreviousTCB->uxPriority;
+                    BaseType_t xLowestPriority = ( BaseType_t ) pxPreviousTCB->uxPriority;
                     BaseType_t xLowestPriorityCore = -1;
 
                     if( ( pxPreviousTCB->uxTaskAttributes & taskATTRIBUTE_IS_IDLE ) != 0 )
@@ -1102,7 +1102,7 @@ static void prvAddNewTaskToReadyList( TCB_t * pxNewTCB ) PRIVILEGED_FUNCTION;
                         uint32_t uxCore;
                         BaseType_t xTaskPriority;
 
-                        uxCore = 31UL - ( uint32_t ) __builtin_clz( uxCoreMap );
+                        uxCore = 31U - ( uint32_t ) __builtin_clz( uxCoreMap );
                         configASSERT( taskVALID_CORE_ID( uxCore ) );
 
                         xTaskPriority = ( BaseType_t ) pxCurrentTCBs[ uxCore ]->uxPriority;
@@ -1123,7 +1123,7 @@ static void prvAddNewTaskToReadyList( TCB_t * pxNewTCB ) PRIVILEGED_FUNCTION;
                             #endif
                             {
                                 xLowestPriority = xTaskPriority;
-                                xLowestPriorityCore = uxCore;
+                                xLowestPriorityCore = ( BaseType_t ) uxCore;
                             }
                         }
                     }
@@ -1875,7 +1875,7 @@ static void prvInitialiseNewTask( TaskFunction_t pxTaskCode,
                  * currently running task and preemption is on then it should
                  * run now. */
                 #if ( configUSE_PREEMPTION == 1 )
-                    prvYieldForTask( pxNewTCB, pdFALSE );
+                    prvYieldForTask( pxNewTCB, ( BaseType_t ) pdFALSE );
                 #endif
             }
             else
@@ -2555,7 +2555,7 @@ static void prvInitialiseNewTask( TaskFunction_t pxTaskCode,
                         }
                         else if( xYieldForTask != ( BaseType_t ) pdFALSE )
                         {
-                            prvYieldForTask( pxTCB, pdTRUE );
+                            prvYieldForTask( pxTCB, ( BaseType_t ) pdTRUE );
                         }
                         else
                         {
@@ -2637,7 +2637,7 @@ static void prvInitialiseNewTask( TaskFunction_t pxTaskCode,
         {
             pxTCB = prvGetTCBFromHandle( xTask );
 
-            pxTCB->xPreemptionDisable = pdTRUE;
+            pxTCB->xPreemptionDisable = ( BaseType_t ) pdTRUE;
         }
         taskEXIT_CRITICAL();
     }
@@ -2656,7 +2656,7 @@ static void prvInitialiseNewTask( TaskFunction_t pxTaskCode,
         {
             pxTCB = prvGetTCBFromHandle( xTask );
 
-            pxTCB->xPreemptionDisable = pdFALSE;
+            pxTCB->xPreemptionDisable = ( BaseType_t ) pdFALSE;
 
             if( xSchedulerRunning != pdFALSE )
             {
@@ -2811,7 +2811,7 @@ static void prvInitialiseNewTask( TaskFunction_t pxTaskCode,
                     }
                     else
                     {
-                        prvYieldCore( xTaskRunningOnCore );
+                        prvYieldCore( ( BaseType_t ) xTaskRunningOnCore );
                     }
 
                     taskEXIT_CRITICAL();
@@ -2958,7 +2958,7 @@ static void prvInitialiseNewTask( TaskFunction_t pxTaskCode,
                     {
                         #if ( configUSE_PREEMPTION == 1 )
                         {
-                            prvYieldForTask( pxTCB, pdTRUE );
+                            prvYieldForTask( pxTCB, ( BaseType_t ) pdTRUE );
                         }
                         #endif /* #if ( configUSE_PREEMPTION == 1 ) */
                     }
@@ -3051,11 +3051,11 @@ static void prvInitialiseNewTask( TaskFunction_t pxTaskCode,
 
                 #if ( ( configNUM_CORES > 1 ) && ( configUSE_PREEMPTION == 1 ) )
                 {
-                    prvYieldForTask( pxTCB, pdTRUE );
+                    prvYieldForTask( pxTCB, ( BaseType_t ) pdTRUE );
 
                     if( xYieldPendings[ portGET_CORE_ID() ] != pdFALSE )
                     {
-                        xYieldRequired = pdTRUE;
+                        xYieldRequired = ( BaseType_t ) pdTRUE;
                     }
                 }
                 #endif /* #if ( ( configNUM_CORES > 1 ) && ( configUSE_PREEMPTION == 1 ) ) */
@@ -4047,7 +4047,7 @@ BaseType_t xTaskCatchUpTicks( TickType_t xTicksToCatchUp )
                     {
                         taskENTER_CRITICAL();
                         {
-                            prvYieldForTask( pxTCB, pdFALSE );
+                            prvYieldForTask( pxTCB, ( BaseType_t ) pdFALSE );
                         }
                         taskEXIT_CRITICAL();
                     }
@@ -4076,7 +4076,7 @@ BaseType_t xTaskIncrementTick( void )
 
     #if ( configUSE_PREEMPTION == 1 ) && ( configNUM_CORES > 1 )
         UBaseType_t x;
-        BaseType_t xYieldRequiredForCore[ configNUM_CORES ] = { pdFALSE };
+        BaseType_t xYieldRequiredForCore[ configNUM_CORES ] = { ( BaseType_t ) pdFALSE };
     #endif /* #if ( configUSE_PREEMPTION == 1 ) && ( configNUM_CORES > 1 ) */
 
     #if ( configNUM_CORES > 1 )
@@ -4202,7 +4202,7 @@ BaseType_t xTaskIncrementTick( void )
                             }
                             #else /* #if( configNUM_CORES == 1 ) */
                             {
-                                prvYieldForTask( pxTCB, pdTRUE );
+                                prvYieldForTask( pxTCB, ( BaseType_t ) pdTRUE );
                             }
                             #endif /* #if( configNUM_CORES == 1 ) */
                         }
@@ -4238,7 +4238,7 @@ BaseType_t xTaskIncrementTick( void )
                     {
                         if( listCURRENT_LIST_LENGTH( &( pxReadyTasksLists[ pxCurrentTCBs[ x ]->uxPriority ] ) ) > ( UBaseType_t ) 1 )
                         {
-                            xYieldRequiredForCore[ x ] = pdTRUE;
+                            xYieldRequiredForCore[ x ] = ( BaseType_t ) pdTRUE;
                         }
                         else
                         {
@@ -4294,11 +4294,11 @@ BaseType_t xTaskIncrementTick( void )
                             {
                                 if( x == ( UBaseType_t ) xCoreID )
                                 {
-                                    xSwitchRequired = pdTRUE;
+                                    xSwitchRequired = ( BaseType_t ) pdTRUE;
                                 }
                                 else
                                 {
-                                    prvYieldCore( x );
+                                    prvYieldCore( ( BaseType_t ) x );
                                 }
                             }
                             else
@@ -4774,7 +4774,7 @@ BaseType_t xTaskRemoveFromEventList( const List_t * const pxEventList )
 
         #if ( configUSE_PREEMPTION == 1 )
         {
-            prvYieldForTask( pxUnblockedTCB, pdFALSE );
+            prvYieldForTask( pxUnblockedTCB, ( BaseType_t ) pdFALSE );
 
             if( xYieldPendings[ portGET_CORE_ID() ] != pdFALSE )
             {
@@ -4844,7 +4844,7 @@ void vTaskRemoveFromUnorderedEventList( ListItem_t * pxEventListItem,
         {
             taskENTER_CRITICAL();
             {
-                prvYieldForTask( pxUnblockedTCB, pdFALSE );
+                prvYieldForTask( pxUnblockedTCB, ( BaseType_t ) pdFALSE );
             }
             taskEXIT_CRITICAL();
         }
@@ -6112,7 +6112,7 @@ static void prvResetNextTaskUnblockTime( void )
         }
         else
         {
-            xYieldPendings[ portGET_CORE_ID() ] = pdTRUE;
+            xYieldPendings[ portGET_CORE_ID() ] = ( BaseType_t ) pdTRUE;
         }
     }
 #endif /* #if ( configNUM_CORES > 1 ) */
@@ -6961,7 +6961,7 @@ TickType_t uxTaskResetEventItemValue( void )
                 {
                     #if ( configUSE_PREEMPTION == 1 )
                     {
-                        prvYieldForTask( pxTCB, pdFALSE );
+                        prvYieldForTask( pxTCB, ( BaseType_t ) pdFALSE );
                     }
                     #endif
                 }
@@ -7116,13 +7116,13 @@ TickType_t uxTaskResetEventItemValue( void )
                 {
                     #if ( configUSE_PREEMPTION == 1 )
                     {
-                        prvYieldForTask( pxTCB, pdFALSE );
+                        prvYieldForTask( pxTCB, ( BaseType_t ) pdFALSE );
 
                         if( xYieldPendings[ portGET_CORE_ID() ] == pdTRUE )
                         {
                             if( pxHigherPriorityTaskWoken != NULL )
                             {
-                                *pxHigherPriorityTaskWoken = pdTRUE;
+                                *pxHigherPriorityTaskWoken = ( BaseType_t ) pdTRUE;
                             }
                         }
                     }
@@ -7227,13 +7227,13 @@ TickType_t uxTaskResetEventItemValue( void )
                 {
                     #if ( configUSE_PREEMPTION == 1 )
                     {
-                        prvYieldForTask( pxTCB, pdFALSE );
+                        prvYieldForTask( pxTCB, ( BaseType_t ) pdFALSE );
 
                         if( xYieldPendings[ portGET_CORE_ID() ] == pdTRUE )
                         {
                             if( pxHigherPriorityTaskWoken != NULL )
                             {
-                                *pxHigherPriorityTaskWoken = pdTRUE;
+                                *pxHigherPriorityTaskWoken = ( BaseType_t ) pdTRUE;
                             }
                         }
                     }
