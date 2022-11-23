@@ -199,7 +199,7 @@ typedef enum
  *
  * \ingroup TaskUtils
  */
-#define tskNO_AFFINITY      ( ( UBaseType_t ) -1U )
+#define tskNO_AFFINITY      ( ( UBaseType_t ) ( ( BaseType_t ) -1 ) )
 
 /**
  * task. h
@@ -277,7 +277,7 @@ typedef enum
 #define taskSCHEDULER_RUNNING        ( ( BaseType_t ) 2 )
 
 /* Checks if core ID is valid. */
-#define taskVALID_CORE_ID( xCoreID )    ( ( BaseType_t ) ( ( 0 <= xCoreID ) && ( xCoreID < configNUM_CORES ) ) )
+#define taskVALID_CORE_ID( xCoreID )    ( ( 0 <= xCoreID ) && ( xCoreID < configNUM_CORES ) )
 
 /*-----------------------------------------------------------
 * TASK CREATION API
