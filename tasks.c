@@ -723,7 +723,7 @@ static void prvAddNewTaskToReadyList( TCB_t * pxNewTCB ) PRIVILEGED_FUNCTION;
          * core is no longer running, then vTaskSwitchContext() probably should
          * be run before returning, but we don't have a way to force that to happen
          * from here. */
-        if( portCHECK_IF_IN_ISR() == pdFALSE )
+        if( portCHECK_IF_IN_ISR() == ( BaseType_t ) pdFALSE )
         {
             /* This function is always called with interrupts disabled
              * so this is safe. */
@@ -793,7 +793,7 @@ static void prvAddNewTaskToReadyList( TCB_t * pxNewTCB ) PRIVILEGED_FUNCTION;
     static void prvYieldCore( BaseType_t xCoreID )
     {
         /* This must be called from a critical section and xCoreID must be valid. */
-        if( portCHECK_IF_IN_ISR() && ( xCoreID == portGET_CORE_ID() ) )
+        if( ( portCHECK_IF_IN_ISR() == ( BaseType_t ) pdTRUE ) && ( xCoreID == portGET_CORE_ID() ) )
         {
             xYieldPendings[ xCoreID ] = ( BaseType_t ) pdTRUE;
         }
@@ -900,7 +900,12 @@ static void prvAddNewTaskToReadyList( TCB_t * pxNewTCB ) PRIVILEGED_FUNCTION;
                 }
             }
 
-            if( ( xYieldCount == ( BaseType_t ) 0 ) && taskVALID_CORE_ID( ( UBaseType_t ) xLowestPriorityCore ) )
+            /* 
+             * The rule 14.3 is "Controlling expressions shall not be invariant." 
+             * xYieldCount is variant when configRUN_MULTIPLE_PRIORITIES != 0. Suppress it.
+             */
+            /* coverity[misra_c_2012_rule_14_3_violation] */
+            if( ( xYieldCount == ( BaseType_t ) 0 ) && taskVALID_CORE_ID( xLowestPriorityCore ) )
             {
                 prvYieldCore( xLowestPriorityCore );
             }
@@ -1110,7 +1115,7 @@ static void prvAddNewTaskToReadyList( TCB_t * pxNewTCB ) PRIVILEGED_FUNCTION;
                         BaseType_t xTaskPriority;
 
                         uxCore = 31U - ( uint32_t ) __builtin_clz( uxCoreMap );
-                        configASSERT( taskVALID_CORE_ID( uxCore ) );
+                        configASSERT( taskVALID_CORE_ID( ( BaseType_t ) uxCore ) );
 
                         xTaskPriority = ( BaseType_t ) pxCurrentTCBs[ uxCore ]->uxPriority;
 
@@ -1135,7 +1140,7 @@ static void prvAddNewTaskToReadyList( TCB_t * pxNewTCB ) PRIVILEGED_FUNCTION;
                         }
                     }
 
-                    if( taskVALID_CORE_ID( ( UBaseType_t ) xLowestPriorityCore ) )
+                    if( taskVALID_CORE_ID( xLowestPriorityCore ) )
                     {
                         prvYieldCore( xLowestPriorityCore );
                     }
@@ -5788,7 +5793,7 @@ static void prvResetNextTaskUnblockTime( void )
         {
             TaskHandle_t xReturn = NULL;
 
-            if( taskVALID_CORE_ID( ( UBaseType_t ) xCoreID ) )
+            if( taskVALID_CORE_ID( xCoreID ) )
             {
                 xReturn = pxCurrentTCBs[ xCoreID ];
             }
