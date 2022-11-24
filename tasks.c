@@ -3128,24 +3128,51 @@ static BaseType_t prvCreateIdleTasks( void )
         {
             if( x < configMAX_TASK_NAME_LEN )
             {
-                BaseType_t xBytePrint = 0;
-                UBaseType_t uxRemainBytes = ( UBaseType_t ) ( ( UBaseType_t ) configMAX_TASK_NAME_LEN - ( UBaseType_t ) x );
-                
-                /* 
-                 * The rule 18.4 is "The +, -, += and -= operators should not be applied to an expression of
-                 * pointer type." Pointer arithmetic allowed on char types, especially when it assists conveying intent.
-                 */
-                /* 
-                 * The rule 21.6 is "The Standard Library input/output routines shall not be used." 
-                 * snprintf() allowed as this is compiled with many compilers and this is a utility function only - not part of the core kernel implementation.
-                 */
-                /* coverity[misra_c_2012_rule_18_4_violation] */
-                /* coverity[misra_c_2012_rule_21_6_violation] */
-                xBytePrint = snprintf( cIdleName + x, uxRemainBytes, "%d", xCoreID );
+                UBaseType_t uxRemainSpaces = ( UBaseType_t ) ( ( UBaseType_t ) configMAX_TASK_NAME_LEN - ( UBaseType_t ) x - 1U ); /* Reserve 1 byte for '\0'. */
+                UBaseType_t uxDigitNum = 1;
+                BaseType_t xTempCoreID = xCoreID / 10;
 
-                if( xBytePrint > ( BaseType_t ) 0 )
+                /* Count digit number of xCoreID. */
+                /* 
+                 * If configNUM_CORES >= 10, this loop would be used.
+                 */
+                /* coverity[dead_error_condition] */
+                while( xTempCoreID > ( BaseType_t ) 0 )
                 {
-                    x = ( BaseType_t ) strlen( cIdleName );
+                    xTempCoreID /= 10;
+                    uxDigitNum++;
+                }
+
+                /* Remove ID from latest digit one by one. */
+                xTempCoreID = xCoreID;
+                while( uxDigitNum > uxRemainSpaces )
+                {
+                    uxDigitNum--;
+                    xTempCoreID /= 10;
+                }
+
+                if( uxDigitNum > 0U )
+                {
+                    BaseType_t xBytePrint;
+
+                    /* 
+                     * The rule 18.4 is "The +, -, += and -= operators should not be applied to an expression of
+                     * pointer type." Pointer arithmetic allowed on char types, especially when it assists conveying intent.
+                     */
+                    /* 
+                     * The rule 21.6 is "The Standard Library input/output routines shall not be used." 
+                     * sprintf() allowed as this is compiled with many compilers and this is a utility function only - not part of the core kernel implementation.
+                     */
+                    /* Remaining spaces is calculated by uxRemainSpaces, so no overrun here. */
+                    /* coverity[misra_c_2012_rule_21_6_violation] */
+                    /* coverity[misra_c_2012_rule_18_4_violation] */
+                    /* coverity[sprintf_overrun] */
+                    xBytePrint = sprintf( cIdleName + x, "%d", xTempCoreID );
+
+                    if( xBytePrint > ( BaseType_t ) 0 )
+                    {
+                        x += ( BaseType_t ) uxDigitNum;
+                    }
                 }
 
                 /* And append a null character if there is space. */
@@ -3201,7 +3228,7 @@ static BaseType_t prvCreateIdleTasks( void )
                                                                      configMINIMAL_STACK_SIZE,
                                                                      ( void * ) NULL,                   /*lint !e961.  The cast is not redundant for all compilers. */
                                                                      portPRIVILEGE_BIT,                 /* In effect ( tskIDLE_PRIORITY | portPRIVILEGE_BIT ), but tskIDLE_PRIORITY is zero. */
-                                                                     &xIdleTaskStackBuffers[ xCoreID - 1 ],
+                                                                     xIdleTaskStackBuffers[ xCoreID - 1 ],
                                                                      &xIdleTCBBuffers[ xCoreID - 1 ] ); /*lint !e961 MISRA exception, justified as it is not a redundant explicit cast to all supported compilers. */
                 }
             #endif /* #if ( configNUM_CORES > 1 ) */
