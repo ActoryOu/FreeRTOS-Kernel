@@ -3128,6 +3128,11 @@ static BaseType_t prvCreateIdleTasks( void )
                 BaseType_t xBytePrint = 0;
                 UBaseType_t uxRemainBytes = ( UBaseType_t ) ( ( UBaseType_t ) configMAX_TASK_NAME_LEN - ( UBaseType_t ) x );
                 
+                /* 
+                 * The rule 18.4 is "The +, -, += and -= operators should not be applied to an expression of
+                 * pointer type." Pointer arithmetic allowed on char types, especially when it assists conveying intent.
+                 */
+                /* coverity[misra_c_2012_rule_18_4_violation] */
                 xBytePrint = snprintf( cIdleName + x, uxRemainBytes, "%d", xCoreID );
 
                 if( xBytePrint > ( BaseType_t ) 0 )
