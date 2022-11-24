@@ -6170,7 +6170,7 @@ static void prvResetNextTaskUnblockTime( void )
                     portGET_ISR_LOCK();
                 }
 
-                ( pxCurrentTCB->uxCriticalNesting )++;
+                pxCurrentTCB->uxCriticalNesting = pxCurrentTCB->uxCriticalNesting + 1U;
 
                 /* This is not the interrupt safe version of the enter critical
                  * function so  assert() if it is being called from an interrupt
@@ -6219,7 +6219,7 @@ static void prvResetNextTaskUnblockTime( void )
                 portGET_ISR_LOCK();
             }
 
-            ( pxCurrentTCB->uxCriticalNesting )++;
+            pxCurrentTCB->uxCriticalNesting = pxCurrentTCB->uxCriticalNesting + 1U;
         }
         else
         {
@@ -6253,7 +6253,7 @@ static void prvResetNextTaskUnblockTime( void )
 
             if( pxCurrentTCB->uxCriticalNesting > 0U )
             {
-                ( pxCurrentTCB->uxCriticalNesting )--;
+                pxCurrentTCB->uxCriticalNesting = pxCurrentTCB->uxCriticalNesting - 1U;
 
                 if( pxCurrentTCB->uxCriticalNesting == 0U )
                 {
@@ -6316,7 +6316,7 @@ static void prvResetNextTaskUnblockTime( void )
 
             if( pxCurrentTCB->uxCriticalNesting > 0U )
             {
-                ( pxCurrentTCB->uxCriticalNesting )--;
+                pxCurrentTCB->uxCriticalNesting = pxCurrentTCB->uxCriticalNesting - 1U;
 
                 if( pxCurrentTCB->uxCriticalNesting == 0U )
                 {
@@ -6678,7 +6678,7 @@ TickType_t uxTaskResetEventItemValue( void )
          * then pxCurrentTCB will be NULL. */
         if( pxCurrentTCB != NULL )
         {
-            ( pxCurrentTCB->uxMutexesHeld )++;
+            pxCurrentTCB->uxMutexesHeld = pxCurrentTCB->uxMutexesHeld + 1U;
         }
 
         return pxCurrentTCB;
