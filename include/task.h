@@ -1369,7 +1369,7 @@ BaseType_t xTaskResumeFromISR( TaskHandle_t xTaskToResume ) PRIVILEGED_FUNCTION;
  *     }
  * }
  */
-    UBaseType_t vTaskCoreAffinityGet( const TaskHandle_t xTask );
+    UBaseType_t vTaskCoreAffinityGet( ConstTaskHandle_t xTask );
 #endif
 
 #if ( configUSE_TASK_PREEMPTION_DISABLE == 1 )
