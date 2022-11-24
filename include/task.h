@@ -199,7 +199,7 @@ typedef enum
  *
  * \ingroup TaskUtils
  */
-#define tskNO_AFFINITY      ( ( UBaseType_t ) ( ( BaseType_t ) -1 ) )
+#define tskNO_AFFINITY      ( ( UBaseType_t ) -1 )
 
 /**
  * task. h
