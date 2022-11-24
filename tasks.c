@@ -407,16 +407,18 @@ typedef tskTCB TCB_t;
 /*lint -save -e956 A manual analysis and inspection has been used to determine
  * which static variables must be declared volatile. */
 #if ( configNUM_CORES == 1 )
-    /* Declare an extern here to confort MISRA C 2012 Rule 8.4 - 
-     * "A compatible declaration shall be visible when an object or function with external linkage is defined"
-     * This variable is used in some ports. */
-    extern portDONT_DISCARD PRIVILEGED_DATA TCB_t * volatile pxCurrentTCB;
+    /* 
+     * The rule 8.4 is "A compatible declaration shall be visible when an object or function with 
+     * external linkage is defined." This variable is used in some ports.
+     */
+    /* coverity[misra_c_2012_rule_8_4_violation] */
     portDONT_DISCARD PRIVILEGED_DATA TCB_t * volatile pxCurrentTCB = NULL;
 #else
-    /* Declare an extern here to confort MISRA C 2012 Rule 8.4 - 
-     * "A compatible declaration shall be visible when an object or function with external linkage is defined"
-     * This variable is used in some ports. */
-    extern portDONT_DISCARD PRIVILEGED_DATA TCB_t * volatile pxCurrentTCBs[ configNUM_CORES ];
+    /* 
+     * The rule 8.4 is "A compatible declaration shall be visible when an object or function with 
+     * external linkage is defined." This variable is used in some ports.
+     */
+    /* coverity[misra_c_2012_rule_8_4_violation] */
     portDONT_DISCARD PRIVILEGED_DATA TCB_t * volatile pxCurrentTCBs[ configNUM_CORES ] = {
         [0 ... configNUM_CORES-1] = NULL,
     };
@@ -470,10 +472,11 @@ PRIVILEGED_DATA static TaskHandle_t xIdleTaskHandles[ configNUM_CORES ] = { /*< 
 /* Improve support for OpenOCD. The kernel tracks Ready tasks via priority lists.
  * For tracking the state of remote threads, OpenOCD uses uxTopUsedPriority
  * to determine the number of priority lists to read back from the remote target. */
-/* Declare an extern here to confort MISRA C 2012 Rule 8.4 - 
- * "A compatible declaration shall be visible when an object or function with external linkage is defined"
- * This variable is used in OpenOCD. */
-extern const volatile UBaseType_t uxTopUsedPriority;
+/* 
+ * The rule 8.4 is "A compatible declaration shall be visible when an object or function with 
+ * external linkage is defined." This variable is used in OpenOCD.
+ */
+/* coverity[misra_c_2012_rule_8_4_violation] */
 const volatile UBaseType_t uxTopUsedPriority = configMAX_PRIORITIES - 1U;
 
 /* Context switches are held pending while the scheduler is suspended.  Also,
@@ -6221,6 +6224,11 @@ static void prvResetNextTaskUnblockTime( void )
 
 #if ( ( portCRITICAL_NESTING_IN_TCB == 1 ) && ( configNUM_CORES > 1 ) )
 
+/* 
+ * The rule 8.4 is "A compatible declaration shall be visible when an object or function with 
+ * external linkage is defined." vTaskEnterCriticalFromISR might be used by port layer.
+ */
+/* coverity[misra_c_2012_rule_8_4_violation] */
     UBaseType_t vTaskEnterCriticalFromISR( void )
     {
         UBaseType_t uxSavedInterruptStatus = 0;
@@ -6319,6 +6327,11 @@ static void prvResetNextTaskUnblockTime( void )
 
 #if ( ( portCRITICAL_NESTING_IN_TCB == 1 ) && ( configNUM_CORES > 1 ) )
 
+/* 
+ * The rule 8.4 is "A compatible declaration shall be visible when an object or function with 
+ * external linkage is defined." vTaskExitCriticalFromISR might be used by port layer.
+ */
+/* coverity[misra_c_2012_rule_8_4_violation] */
     void vTaskExitCriticalFromISR( UBaseType_t uxSavedInterruptStatus )
     {
         BaseType_t xYieldCurrentTask;
