@@ -3132,7 +3132,12 @@ static BaseType_t prvCreateIdleTasks( void )
                  * The rule 18.4 is "The +, -, += and -= operators should not be applied to an expression of
                  * pointer type." Pointer arithmetic allowed on char types, especially when it assists conveying intent.
                  */
+                /* 
+                 * The rule 21.6 is "The Standard Library input/output routines shall not be used." 
+                 * snprintf() allowed as this is compiled with many compilers and this is a utility function only - not part of the core kernel implementation.
+                 */
                 /* coverity[misra_c_2012_rule_18_4_violation] */
+                /* coverity[misra_c_2012_rule_21_6_violation] */
                 xBytePrint = snprintf( cIdleName + x, uxRemainBytes, "%d", xCoreID );
 
                 if( xBytePrint > ( BaseType_t ) 0 )
