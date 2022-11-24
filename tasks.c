@@ -946,6 +946,9 @@ static void prvAddNewTaskToReadyList( TCB_t * pxNewTCB ) PRIVILEGED_FUNCTION;
             if( listLIST_IS_EMPTY( &( pxReadyTasksLists[ uxCurrentPriority ] ) ) == pdFALSE )
             {
                 List_t * const pxReadyList = &( pxReadyTasksLists[ uxCurrentPriority ] );
+                /* MISRA Rule 11.3 prohibits casting a pointer to a different type.
+                 * Allow to convert from MiniListItem_t to ListItem_t. */
+                /* coverity[misra_c_2012_rule_11_3_violation] */
                 const ListItem_t * pxEndMarker = listGET_END_MARKER( pxReadyList );
                 ListItem_t * pxIterator;
 
