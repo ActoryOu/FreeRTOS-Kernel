@@ -258,7 +258,7 @@
                                                       configTIMER_SERVICE_TASK_NAME,
                                                       ulTimerTaskStackSize,
                                                       NULL,
-                                                      ( UBaseType_t ) ( ( uint8_t ) configTIMER_TASK_PRIORITY ) | portPRIVILEGE_BIT,
+                                                      configTIMER_TASK_PRIORITY | portPRIVILEGE_BIT,
                                                       pxTimerTaskStackBuffer,
                                                       pxTimerTaskTCBBuffer );
 
@@ -273,7 +273,7 @@
                                        configTIMER_SERVICE_TASK_NAME,
                                        configTIMER_TASK_STACK_DEPTH,
                                        NULL,
-                                       ( ( UBaseType_t ) configTIMER_TASK_PRIORITY ) | portPRIVILEGE_BIT,
+                                       configTIMER_TASK_PRIORITY | portPRIVILEGE_BIT,
                                        &xTimerTaskHandle );
             }
             #endif /* configSUPPORT_STATIC_ALLOCATION */
