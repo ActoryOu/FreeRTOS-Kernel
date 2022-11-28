@@ -3022,15 +3022,6 @@ static BaseType_t prvCreateIdleTasks( void )
     {
         BaseType_t x;
 
-        if( xReturn == pdFAIL )
-        {
-            break;
-        }
-        else
-        {
-            mtCOVERAGE_TEST_MARKER();
-        }
-
         for( x = ( BaseType_t ) 0; x < ( BaseType_t ) configMAX_TASK_NAME_LEN; x++ )
         {
             cIdleName[ x ] = configIDLE_TASK_NAME[ x ];
@@ -3143,6 +3134,15 @@ static BaseType_t prvCreateIdleTasks( void )
             #endif /* #if ( configNUM_CORES > 1 ) */
         }
         #endif /* configSUPPORT_STATIC_ALLOCATION */
+
+        if( xReturn == pdFAIL )
+        {
+            break;
+        }
+        else
+        {
+            mtCOVERAGE_TEST_MARKER();
+        }
     }
 
     return xReturn;
