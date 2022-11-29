@@ -374,7 +374,14 @@ typedef tskTCB TCB_t;
 #if ( configNUM_CORES == 1 )
     portDONT_DISCARD PRIVILEGED_DATA TCB_t * volatile pxCurrentTCB = NULL;
 #else
-portDONT_DISCARD PRIVILEGED_DATA TCB_t * volatile pxCurrentTCBs[ configNUM_CORES ] = { NULL };
+    /* 
+     * The rule 8.4 is "A compatible declaration shall be visible when an object or function with 
+     * external linkage is defined." This variable is used in some ports.
+     */
+    /* coverity[misra_c_2012_rule_8_4_violation] */
+    portDONT_DISCARD PRIVILEGED_DATA TCB_t * volatile pxCurrentTCBs[ configNUM_CORES ] = {
+        [0 ... configNUM_CORES-1] = NULL,
+    };
     #define pxCurrentTCB    xTaskGetCurrentTaskHandle()
 #endif
 
@@ -418,7 +425,9 @@ PRIVILEGED_DATA static volatile BaseType_t xYieldPendings[ configNUM_CORES ] = {
 PRIVILEGED_DATA static volatile BaseType_t xNumOfOverflows = ( BaseType_t ) 0;
 PRIVILEGED_DATA static UBaseType_t uxTaskNumber = ( UBaseType_t ) 0U;
 PRIVILEGED_DATA static volatile TickType_t xNextTaskUnblockTime = ( TickType_t ) 0U; /* Initialised to portMAX_DELAY before the scheduler starts. */
-PRIVILEGED_DATA static TaskHandle_t xIdleTaskHandles[ configNUM_CORES ] = { NULL };  /*< Holds the handles of the idle tasks.  The idle tasks are created automatically when the scheduler is started. */
+PRIVILEGED_DATA static TaskHandle_t xIdleTaskHandles[ configNUM_CORES ] = { /*< Holds the handles of the idle tasks.  The idle tasks are created automatically when the scheduler is started. */
+    [0 ... configNUM_CORES-1] = NULL,
+};  
 
 /* Improve support for OpenOCD. The kernel tracks Ready tasks via priority lists.
  * For tracking the state of remote threads, OpenOCD uses uxTopUsedPriority
@@ -674,7 +683,10 @@ static void prvAddNewTaskToReadyList( TCB_t * pxNewTCB ) PRIVILEGED_FUNCTION;
          * from here. */
         /* MISRA Ref 4.6.1 [typedef indicates size and signedness] */
         /* More details at: https://github.com/FreeRTOS/FreeRTOS-Kernel/blob/main/MISRA.md#directive-46 */
+        /* MISRA Ref 17.3.1 [Function shall not be declared implicitly] */
+        /* More details at: https://github.com/FreeRTOS/FreeRTOS-Kernel/blob/main/MISRA.md#rule-173 */
         /* coverity[misra_c_2012_directive_4_6_violation] */
+        /* coverity[misra_c_2012_rule_17_3_violation] */
         if( portCHECK_IF_IN_ISR() == pdFALSE )
         {
             /* This function is always called with interrupts disabled
@@ -745,6 +757,9 @@ static void prvAddNewTaskToReadyList( TCB_t * pxNewTCB ) PRIVILEGED_FUNCTION;
     static void prvYieldCore( BaseType_t xCoreID )
     {
         /* This must be called from a critical section and xCoreID must be valid. */
+        /* MISRA Ref 17.3.1 [Function shall not be declared implicitly] */
+        /* More details at: https://github.com/FreeRTOS/FreeRTOS-Kernel/blob/main/MISRA.md#rule-173 */
+        /* coverity[misra_c_2012_rule_17_3_violation] */
         if( portCHECK_IF_IN_ISR() && ( xCoreID == portGET_CORE_ID() ) )
         {
             xYieldPendings[ xCoreID ] = pdTRUE;
@@ -4458,6 +4473,9 @@ BaseType_t xTaskIncrementTick( void )
                     #ifdef portALT_GET_RUN_TIME_COUNTER_VALUE
                         portALT_GET_RUN_TIME_COUNTER_VALUE( ulTotalRunTime );
                     #else
+                        /* MISRA Ref 17.3.2 [Function shall not be declared implicitly] */
+                        /* More details at: https://github.com/FreeRTOS/FreeRTOS-Kernel/blob/main/MISRA.md#rule-173 */
+                        /* coverity[misra_c_2012_rule_17_3_violation] */
                         ulTotalRunTime = portGET_RUN_TIME_COUNTER_VALUE();
                     #endif
 
@@ -7165,6 +7183,9 @@ TickType_t uxTaskResetEventItemValue( void )
         configRUN_TIME_COUNTER_TYPE ulRunTimeCounter = 0;
         BaseType_t i = 0;
 
+        /* MISRA Ref 17.3.2 [Function shall not be declared implicitly] */
+        /* More details at: https://github.com/FreeRTOS/FreeRTOS-Kernel/blob/main/MISRA.md#rule-173 */
+        /* coverity[misra_c_2012_rule_17_3_violation] */
         ulTotalTime = portGET_RUN_TIME_COUNTER_VALUE() * configNUM_CORES;
 
         /* For percentage calculations. */
