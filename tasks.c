@@ -491,7 +491,7 @@ static BaseType_t prvCreateIdleTasks( void );
  * Yields a core, or cores if multiple priorities are not allowed to run
  * simultaneously, to allow the task pxTCB to run.
  */
-    static void prvYieldForTask( TCB_t * pxTCB,
+    static void prvYieldForTask( const TCB_t * pxTCB,
                                  const BaseType_t xPreemptEqualPriority );
 #endif /* #if ( configNUM_CORES > 1 ) */
 
@@ -791,7 +791,7 @@ static void prvAddNewTaskToReadyList( TCB_t * pxNewTCB ) PRIVILEGED_FUNCTION;
 /*-----------------------------------------------------------*/
 
 #if ( configNUM_CORES > 1 )
-    static void prvYieldForTask( TCB_t * pxTCB,
+    static void prvYieldForTask( const TCB_t * pxTCB,
                                  const BaseType_t xPreemptEqualPriority )
     {
         BaseType_t xLowestPriorityToPreempt;
@@ -904,7 +904,7 @@ static void prvAddNewTaskToReadyList( TCB_t * pxNewTCB ) PRIVILEGED_FUNCTION;
         BaseType_t xDecrementTopPriority = pdTRUE;
 
         #if ( configUSE_CORE_AFFINITY == 1 )
-            TCB_t * pxPreviousTCB = NULL;
+            const TCB_t * pxPreviousTCB = NULL;
         #endif
         #if ( configRUN_MULTIPLE_PRIORITIES == 0 )
             BaseType_t xPriorityDropped = pdFALSE;
@@ -2590,9 +2590,9 @@ static void prvInitialiseNewTask( TaskFunction_t pxTaskCode,
 /*-----------------------------------------------------------*/
 
 #if ( ( configNUM_CORES > 1 ) && ( configUSE_CORE_AFFINITY == 1 ) )
-    UBaseType_t vTaskCoreAffinityGet( const TaskHandle_t xTask )
+    UBaseType_t vTaskCoreAffinityGet( ConstTaskHandle_t xTask )
     {
-        TCB_t * pxTCB;
+        const TCB_t * pxTCB;
         UBaseType_t uxCoreAffinityMask;
 
         taskENTER_CRITICAL();
