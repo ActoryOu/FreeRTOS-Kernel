@@ -1051,7 +1051,7 @@ static void prvAddNewTaskToReadyList( TCB_t * pxNewTCB ) PRIVILEGED_FUNCTION;
                     /* A ready task was just evicted from this core. See if it can be
                      * scheduled on any other core. */
                     UBaseType_t uxCoreMap = pxPreviousTCB->uxCoreAffinityMask;
-                    BaseType_t xLowestPriority = pxPreviousTCB->uxPriority;
+                    BaseType_t xLowestPriority = ( BaseType_t ) pxPreviousTCB->uxPriority;
                     BaseType_t xLowestPriorityCore = -1;
 
                     if( ( pxPreviousTCB->uxTaskAttributes & taskATTRIBUTE_IS_IDLE ) != 0 )
@@ -1080,7 +1080,7 @@ static void prvAddNewTaskToReadyList( TCB_t * pxNewTCB ) PRIVILEGED_FUNCTION;
                         uint32_t uxCore;
                         BaseType_t xTaskPriority;
 
-                        uxCore = 31UL - ( uint32_t ) __builtin_clz( uxCoreMap );
+                        uxCore = 31U - ( uint32_t ) __builtin_clz( uxCoreMap );
                         configASSERT( taskVALID_CORE_ID( uxCore ) );
 
                         xTaskPriority = ( BaseType_t ) pxCurrentTCBs[ uxCore ]->uxPriority;
@@ -1101,7 +1101,7 @@ static void prvAddNewTaskToReadyList( TCB_t * pxNewTCB ) PRIVILEGED_FUNCTION;
                             #endif
                             {
                                 xLowestPriority = xTaskPriority;
-                                xLowestPriorityCore = uxCore;
+                                xLowestPriorityCore = ( BaseType_t) uxCore;
                             }
                         }
                     }
@@ -4224,7 +4224,7 @@ BaseType_t xTaskIncrementTick( void )
                                 }
                                 else
                                 {
-                                    prvYieldCore( x );
+                                    prvYieldCore( ( BaseType_t ) x );
                                 }
                             }
                             else
