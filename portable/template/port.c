@@ -1,5 +1,5 @@
 /*
- * FreeRTOS Kernel <DEVELOPMENT BRANCH>
+ * FreeRTOS Kernel V20.0.1
  * license and copyright intentionally withheld to promote copying into user code.
  */
 
