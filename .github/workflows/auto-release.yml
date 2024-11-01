@@ -64,7 +64,6 @@ jobs:
           VERSION_NUMBER: ${{ github.event.inputs.version_number }}
           MAIN_BR_VERSION_NUMBER: ${{ github.event.inputs.main_br_version }}
           COMMIT_SHA_1: ${{ env.COMMIT_SHA_1 }}
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           # Install deps and run
           pip install -r ./tools/.github/scripts/release-requirements.txt
@@ -110,7 +109,6 @@ jobs:
           MAIN_BR_VERSION_NUMBER: ${{ github.event.inputs.main_br_version }}
           COMMIT_SHA_2: ${{ env.COMMIT_SHA_2 }}
           REPO_OWNER: ${{ github.repository_owner }}
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           # Install deps and run
           pip install -r ./tools/.github/scripts/release-requirements.txt
